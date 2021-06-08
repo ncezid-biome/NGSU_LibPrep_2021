@@ -34,3 +34,55 @@ colnames(mpileups_O181) <- c("position", O181Header)
 
 # combine tables
 mpileups <- left_join(mpileups_O130, mpileups_O181, by = "position")
+
+# these column names are terrible and have way too much data embedded. Let's make this tidy.
+# first turn into a 3 column table with SeqID, Coverage, and Position.
+mpileups <- gather(mpileups, SeqID, Coverage, "2015EL-1671a-M347-18-009_Flex_300":"2015C-3865-M3235-16-039_XT_500")
+# now split SeqID into multiple columns
+mpileups <- mutate(mpileups, 
+                   Isolate = str_replace(str_extract(SeqID, "^.*-M"), "-M", ""),
+                   LibKit = str_extract(SeqID, "(XT|NEB|KAPA|Qia|Flex)"),
+                   Cycles = str_replace(str_extract(SeqID, "_(300|500)"), "_", ""))
+# set correct data types
+mpileups <- mutate(mpileups,
+                   position = as.numeric(position),
+                   SeqID = as.factor(SeqID),
+                   Coverage = as.numeric(Coverage),
+                   Isolate = as.factor(Isolate),
+                   LibKit = as.factor(LibKit),
+                   Cycles = as.factor(Cycles))
+
+# now we plot! But first, we split up the data for different manuscripts
+angelaData <- filter(mpileups, LibKit == "Flex" | LibKit == "XT")
+angelaData$LibKit <- droplevels(angelaData$LibKit)
+jennyData <- filter(mpileups, LibKit != "XT")
+jennyData$LibKit <- droplevels(jennyData$LibKit)
+
+angelaPlot <- ggplot(angelaData, aes(x = position, y = Coverage)) +
+              geom_line(aes(linetype = Cycles, colour = Isolate)) +
+              facet_wrap(vars(LibKit), nrow = 2, scales = "free_y") +
+              xlab("wzx Alignment Position") +
+              scale_color_manual(values = c("#e66101", "#5e3c99")) +
+              scale_x_continuous(breaks = seq(0, 1300, 100))
+angelaPlot
+
+jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
+             geom_line(aes(linetype = Cycles, colour = Isolate)) +
+             facet_wrap(vars(LibKit), nrow = 2, ncol = 2, scales = "free_y") +
+             xlab("wzx Alignment Position") +
+             scale_color_manual(values = c("#e66101", "#5e3c99")) +
+             scale_x_continuous(breaks = seq(0, 1300, 100))
+jennyPlot
+
+# export to pdf
+pdf("wzxCoverage_Angela.pdf",
+    width = 7,
+    height = 7)
+angelaPlot
+dev.off()
+
+pdf("wzxCoverage_Jenny.pdf",
+    width = 12,
+    height = 7)
+jennyPlot
+dev.off()
