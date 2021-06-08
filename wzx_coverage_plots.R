@@ -71,7 +71,8 @@ jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
              facet_wrap(vars(LibKit), nrow = 2, ncol = 2, scales = "free_y") +
              xlab("wzx Alignment Position") +
              scale_color_manual(values = c("#e66101", "#5e3c99")) +
-             scale_x_continuous(breaks = seq(0, 1300, 100))
+             scale_x_continuous(breaks = seq(0, 1300, 100)) +
+             geom_hline(yintercept = 40, size = 1)
 jennyPlot
 
 # export to pdf
