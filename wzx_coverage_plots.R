@@ -59,11 +59,12 @@ jennyData <- filter(mpileups, LibKit != "XT")
 jennyData$LibKit <- droplevels(jennyData$LibKit)
 
 angelaPlot <- ggplot(angelaData, aes(x = position, y = Coverage)) +
-              geom_line(aes(linetype = Cycles, colour = Isolate)) +
-              facet_wrap(vars(LibKit), nrow = 2, scales = "free_y") +
+              geom_line(aes(linetype = LibKit, colour = Isolate)) +
+              facet_wrap(vars(Cycles), nrow = 2, scales = "free_y") +
               xlab("wzx Alignment Position") +
               scale_color_manual(values = c("#e66101", "#5e3c99")) +
-              scale_x_continuous(breaks = seq(0, 1300, 100))
+              scale_x_continuous(breaks = seq(0, 1300, 100)) +
+              geom_hline(yintercept = 40, size = 1)
 angelaPlot
 
 jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
