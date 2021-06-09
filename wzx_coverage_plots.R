@@ -67,6 +67,7 @@ angelaPlot <- ggplot(angelaData, aes(x = position, y = Coverage)) +
               geom_hline(yintercept = 40, size = 1)
 angelaPlot
 
+# in panels by lib kit
 jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
              geom_line(aes(linetype = Cycles, colour = Isolate)) +
              facet_wrap(vars(LibKit), nrow = 2, ncol = 2, scales = "free_y") +
@@ -75,6 +76,17 @@ jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
              scale_x_continuous(breaks = seq(0, 1300, 100)) +
              geom_hline(yintercept = 40, size = 1)
 jennyPlot
+
+# in panels by cycle and isolate
+jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
+             geom_line(aes(colour = LibKit)) +
+             facet_grid(vars(Isolate), vars(Cycles), scales = "free_y") +
+             xlab("wzx Alignment Position") +
+             scale_color_manual(values = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c")) +
+             scale_x_continuous(breaks = seq(0, 1300, 100)) +
+             geom_hline(yintercept = 40, size = 1)
+jennyPlot
+
 
 # export to pdf
 pdf("wzxCoverage_Angela.pdf",
