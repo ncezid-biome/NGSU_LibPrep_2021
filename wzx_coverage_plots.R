@@ -5,6 +5,7 @@
 
 # load packages
 library(tidyverse)
+library(egg)
 
 # read in mpileup data Taylor generated before leave.
 # everyone agreed to use the "proper pairs" data sets.
@@ -57,6 +58,11 @@ angelaData <- filter(mpileups, LibKit == "Flex" | LibKit == "XT")
 angelaData$LibKit <- droplevels(angelaData$LibKit)
 jennyData <- filter(mpileups, LibKit != "XT")
 jennyData$LibKit <- droplevels(jennyData$LibKit)
+jennyData$LibKit <- recode(jennyData$LibKit, 
+                          Flex = "Illumina DNA Prep",
+                          KAPA = "Roche KAPA HyperPlus",
+                          NEB = "NEBNext Ultra II FS",
+                          Qia = "Qiagen QIAseq FX")
 
 angelaPlot <- ggplot(angelaData, aes(x = position, y = Coverage)) +
               geom_line(aes(linetype = LibKit, colour = Isolate)) +
@@ -82,9 +88,12 @@ jennyPlot <- ggplot(jennyData, aes(x = position, y = Coverage)) +
              geom_line(aes(colour = LibKit)) +
              facet_grid(vars(Isolate), vars(Cycles), scales = "free_y") +
              xlab("wzx Alignment Position") +
-             scale_color_manual(values = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c")) +
+             scale_color_manual(values = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c"),
+                                name = "Library Kit") +
              scale_x_continuous(breaks = seq(0, 1300, 100)) +
              geom_hline(yintercept = 40, size = 1)
+jennyPlot <- tag_facet(jennyPlot) +
+             theme(strip.text = element_text(), strip.background = element_rect())
 jennyPlot
 
 
@@ -96,7 +105,7 @@ angelaPlot
 dev.off()
 
 pdf("wzxCoverage_Jenny.pdf",
-    width = 12,
+    width = 14,
     height = 7)
 jennyPlot
 dev.off()
