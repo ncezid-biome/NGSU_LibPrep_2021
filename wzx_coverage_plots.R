@@ -56,6 +56,9 @@ mpileups <- mutate(mpileups,
 # now we plot! But first, we split up the data for different manuscripts
 angelaData <- filter(mpileups, LibKit == "Flex" | LibKit == "XT")
 angelaData$LibKit <- droplevels(angelaData$LibKit)
+angelaData$LibKit <- recode(angelaData$LibKit,
+                            Flex = "DNA Prep",
+                            XT = "Nextera XT")
 jennyData <- filter(mpileups, LibKit != "XT")
 jennyData$LibKit <- droplevels(jennyData$LibKit)
 jennyData$LibKit <- recode(jennyData$LibKit, 
@@ -65,12 +68,15 @@ jennyData$LibKit <- recode(jennyData$LibKit,
                           Qia = "Qiagen QIAseq FX")
 
 angelaPlot <- ggplot(angelaData, aes(x = position, y = Coverage)) +
-              geom_line(aes(linetype = LibKit, colour = Isolate)) +
-              facet_wrap(vars(Cycles), nrow = 2, scales = "free_y") +
+              geom_line(aes(linetype = Cycles, colour = Isolate)) +
+              facet_wrap(vars(LibKit), nrow = 2) +
               xlab("wzx Alignment Position") +
               scale_color_manual(values = c("#e66101", "#5e3c99")) +
               scale_x_continuous(breaks = seq(0, 1300, 100)) +
-              geom_hline(yintercept = 40, size = 1)
+              geom_hline(yintercept = 40, size = 1) +
+              theme(strip.text.x = element_text(face = "bold"), axis.title = element_text(face = "bold"), legend.title = element_text(face = "bold"))
+angelaPlot <- tag_facet(angelaPlot) +
+              theme(strip.text = element_text(), strip.background = element_rect())
 angelaPlot
 
 # in panels by lib kit
