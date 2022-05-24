@@ -122,5 +122,5 @@ ggsave(plot = angelaPlot,
        width = 7,
        height = 7, 
        units = "in",
-       dpi = 600,
+       dpi = 300,
        device = "tiff")

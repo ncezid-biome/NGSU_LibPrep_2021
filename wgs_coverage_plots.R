@@ -203,7 +203,7 @@ dev.off()
 ggsave(filename = "wgsCoverage_Angela.tiff", 
        plot = wgsPlot, 
        device = "tiff",
-       dpi = 600,
+       dpi = 300,
        width = 21,
        height = 14, 
        units = "in")
