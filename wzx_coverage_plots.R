@@ -115,3 +115,12 @@ pdf("wzxCoverage_Jenny.pdf",
     height = 7)
 jennyPlot
 dev.off()
+
+# Tiff requested by editors
+ggsave(plot = angelaPlot,
+       filename = "wzxCoverage_Angela.tiff", 
+       width = 7,
+       height = 7, 
+       units = "in",
+       dpi = 600,
+       device = "tiff")

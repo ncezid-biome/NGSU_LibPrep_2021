@@ -7,7 +7,6 @@ library(tidyverse)
 library(egg)
 library(runner)
 library(scales)
-library(ggbreak)
 
 # read in mpileup data Taylor generated.
 # everyone agreed to use the "proper pairs" data sets.
@@ -34,7 +33,7 @@ mpileups_2015EL_1671a <- dplyr::select(mpileups_2015EL_1671a, X2, X4, X7, X10, X
 colnames(mpileups_2015EL_1671a) <- c("Position", "2015EL-1671a-M3235-16-001", "2015EL-1671a-M347-18-007", "2015EL-1671a-M347-18-009", "2015EL-1671a-M347-20-006")
 
 # Let's make this tidy.
-# first turn into a 3 column table with SeqID, Coverage, and Position, then add a column for the reference.
+# first turn into a 3 column table with SeqID, Coverage, and Position, then add a column for the isolate ID.
 mpileups_2015C_3865 <- gather(mpileups_2015C_3865, 
                               SeqID, 
                               Coverage, 
@@ -53,35 +52,22 @@ mpileupsWGS <- rows_insert(mpileups_2015C_3865,
                            mpileups_2015EL_1671a, 
                            by = c("SeqID", "Isolate", "Position"))
 
+# these are big data sets, so clear out tables that you're done with
 mpileups_2015C_3865 <- NULL
 mpileups_2015EL_1671a <- NULL
 gc()
 
-# omit this for now and add it later
-# now add metadata for each row 
-# mpileupsWGS <- mutate(mpileupsWGS, 
-#                       LibKit = case_when(
-#                         SeqID == "M3235-16-039" | SeqID == "M3235-16-001" | SeqID == "M3235-19-034" | SeqID == "M347-20-006" ~ 'Nextera XT',
-#                         SeqID == "M3235-18-007" | SeqID == "M347-18-009" | SeqID == "M3235-18-002" | SeqID == "M347-18-007" ~ 'DNA Prep'),
-#                       Cycles = case_when(
-#                         SeqID == "M3235-16-039" | SeqID == "M3235-16-001" | SeqID == "M3235-18-002" | SeqID == "M347-18-007" ~ '500',
-#                         SeqID == "M3235-18-007" | SeqID == "M347-18-009" | SeqID == "M3235-19-034" | SeqID == "M347-20-006" ~ '300'))
-
-# mpileupsWGS <- mutate(mpileupsWGS, 
-#                       Position = as.numeric(Position),
-#                       Coverage = as.numeric(Coverage))
-
-# need to take the mean of 1000 nt windows because can't plot full resolution data
+# need to take the mean of 10,000 nt windows because can't plot full resolution data
 mpileupWGS_grouped <- group_by(mpileupsWGS, SeqID)
 
-# This step is crapping out - using >10GB of memory despite clearing everything I can
+
 # Runner introduces a bunch of garbage NAs between the end of the real mpileup data and the 5 million nt end
 mean_mpileupWGS <- summarise(mpileupWGS_grouped, 
-                          Iso = runner(at = seq(from = 10000, to = 5000000, by = 10000),
-                                             x = Isolate,
-                                             f = function(x) x[1],
-                                             k = 10000,
-                                             lag = 0),
+                          Iso = runner(at = seq(from = 10000, to = 5000000, by = 10000), # at provides the end point for the windows that runner is calculating on
+                                             x = Isolate, # the value to use in the calculations
+                                             f = function(x) x[1], # the calculation to do
+                                             k = 10000, # the size of each window
+                                             lag = 0), # don't offset
                           Pos_Window = runner(at = seq(from = 10000, to = 5000000, by = 10000),
                                               x = Position,
                                               f = function(x) max(x),
@@ -212,3 +198,12 @@ pdf("wgsCoverage_Angela.pdf",
     height = 14)
 wgsPlot
 dev.off()
+
+# The journal insisted. EPS not an option because you can't do transparency.
+ggsave(filename = "wgsCoverage_Angela.tiff", 
+       plot = wgsPlot, 
+       device = "tiff",
+       dpi = 600,
+       width = 21,
+       height = 14, 
+       units = "in")
